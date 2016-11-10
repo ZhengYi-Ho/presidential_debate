@@ -1,0 +1,111 @@
+---
+title: "A Sneak Peek at Twitter Data After Election"
+author: "Yanfei Wu"
+date: "November 9, 2016"
+output: 
+  html_document: 
+    highlight: pygments
+    theme: spacelab
+    keep_md: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r packages, include = F}
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+library(plyr)
+library(quanteda)
+library(wordcloud)
+```  
+
+```{r set theme, include = T}
+theme_set(theme_bw())
+```
+
+Donald Trump just won the 2016 presidential election. It is a result that most of the polls failed to predict and the public are taking it in different ways. Here I did some word frequency analysis on 20,000 tweets that mentioned the presidential election from today, just a sneak peek of people's emotions, concerns, and so on. The results are shown below and the codes are available at [Github](https://github.com/yanfei-wu/ForFun/tree/master/Twitter_AfterElection).
+
+```{r read.data}
+# the scraping code is in the seperate R file
+election.txt <- readRDS('election_cleaned.RData')
+```
+
+```{r word.frequency.corpus, include = FALSE}
+# clean the text
+clean <- function(sentences) { 
+    require(plyr)
+    clean.text <- laply(sentences, function(sentence) {
+        sentence <- gsub('http\\S+\\s*', '', sentence)
+        sentence <- gsub('#\\w+ *', '', sentence)
+        sentence <- gsub('@\\w+ *', '', sentence)
+        sentence <- gsub('[[:cntrl:]]', '', sentence)
+        sentence <- gsub('[[:punct:]]', '', sentence)
+        sentence <- gsub('\\d+', '', sentence)
+        sentence <- gsub('rt', '', sentence)
+        return(sentence)
+    })
+    return(clean.text)
+}
+
+# construct corpus
+election.txt <- clean(election.txt)
+election.corpus <- corpus(election.txt)
+
+# tokenization and dfm 1-gram - 4-gram
+
+stop.words <- c(stopwords('english'), 'clinton', 'hillary', 'donald', 'trump', 'clintons', 'trumps', 'president', 'election')
+
+election.token.1gram <- tokenize(election.corpus, ngrams = 1, verbose = F)
+election.dfm.1gram <- dfm(election.token.1gram, ignoredFeatures = stop.words)
+election.token.2gram <- tokenize(election.corpus, ngrams = 2, concatenator = " ", verbose = F)
+election.dfm.2gram <- dfm(election.token.2gram, ignoredFeatures = stop.words)
+election.token.3gram <- tokenize(election.corpus, ngrams = 3, concatenator = " ", verbose = F)
+election.dfm.3gram <- dfm(election.token.3gram, ignoredFeatures = stop.words)
+election.token.4gram <- tokenize(election.corpus, ngrams = 4, concatenator = " ", verbose = F)
+election.dfm.4gram <- dfm(election.token.4gram, ignoredFeatures = stop.words)
+```
+
+The frequency plots are shown below:  
+
+```{r word.frequency.plot, fig.width = 10, fig.height = 12, fig.align = 'center'}
+# top words
+election.top.1gram <- data.frame(word = rownames(as.matrix(topfeatures(election.dfm.1gram, 15))), 
+                      freq = as.matrix(topfeatures(election.dfm.1gram, 15))[, 1])
+election.top.1gram$uniterm <- reorder(election.top.1gram$word, election.top.1gram$freq)
+election.top.2gram <- data.frame(word = rownames(as.matrix(topfeatures(election.dfm.2gram, 15))), 
+                      freq = as.matrix(topfeatures(election.dfm.2gram, 15))[, 1])
+election.top.2gram$biterm <- reorder(election.top.2gram$word, election.top.2gram$freq)
+election.top.3gram <- data.frame(word = rownames(as.matrix(topfeatures(election.dfm.3gram, 15))), 
+                      freq = as.matrix(topfeatures(election.dfm.3gram, 15))[, 1])
+election.top.3gram$triterm <- reorder(election.top.3gram$word, election.top.3gram$freq)
+election.top.4gram <- data.frame(word = rownames(as.matrix(topfeatures(election.dfm.4gram, 15))), 
+                      freq = as.matrix(topfeatures(election.dfm.4gram, 15))[, 1])
+election.top.4gram$quadriterm <- reorder(election.top.4gram$word, election.top.4gram$freq)
+
+# Plots
+plot1 <- ggplot(election.top.1gram, aes(x = uniterm, y = freq)) + 
+    geom_bar(stat = "identity", aes(fill = freq)) + 
+    labs(x = '', y = 'Frequency', title = 'Top 15 Single Words') + 
+    coord_flip()  
+plot2 <- ggplot(election.top.2gram, aes(x = biterm, y = freq)) + 
+    geom_bar(stat = "identity", aes(fill = freq)) + 
+    labs(x = '', y = 'Frequency', title = 'Top 15 2-Word Phrases') + 
+    coord_flip()
+plot3 <- ggplot(election.top.3gram, aes(x = triterm, y = freq)) + 
+    geom_bar(stat = "identity", aes(fill = freq)) + 
+    labs(x = '', y = 'Frequency', title = 'Top 15 3-Word Phrases') + 
+    coord_flip()
+plot4 <- ggplot(election.top.4gram, aes(x = quadriterm, y = freq)) + 
+    geom_bar(stat = "identity", aes(fill = freq)) + 
+    labs(x = '', y = 'Frequency', title = 'Top 15 4-Word Phrases') + 
+    coord_flip() 
+grid.arrange(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2)
+```
+
+```{r word.cloud.clinton, fig.width = 6, fig.height = 6, fig.align = 'center'}
+plot(election.dfm.1gram, max.words = 100, scale = c(3, .2))
+title('Top 100 Words in Twitter about Election')
+```
