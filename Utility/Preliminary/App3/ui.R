@@ -37,19 +37,35 @@ shinyUI(navbarPage(
              # sidepanel
              fluidRow(
                  column(3, wellPanel(
+                     selectInput("t2.building", h5(strong("Building Type")), 
+                                 choices = list('Apartment' = 'apt')),
                      selectInput("t2.state", h5(strong("State")), 
                                  c(structure(tolower(state.name), name = state.name))),
                      selectInput("t2.county", h5(strong("County")), c("All county"= "")),
                      radioButtons("t2.age", label = h5(strong("Apartment Age")), selected = NULL,
                                   choices = list("Pre-1980" = 1, "1980-2004" = 2, "post-2004" = 3)))
                  ),
-                 
-                 mainPanel(h3("Apartment Electricity Usage by Category"),
+                 # mainpanel
+                 mainPanel(h3("Estimated Electricity Usage by Category"),
                            fluidRow(column(12, align = 'center', plotOutput("plot2")))))),
              
     
     # tab 3: about
-    navbarMenu(strong("More"),
-               tabPanel(strong("Green Energy Solutions")),
-               tabPanel(strong("About")))
+    tabPanel((strong("Building Upgrade")),
+             fluidRow(
+                 column(3, wellPanel(
+                     radioButtons("t3.age", label = h5(strong("Building Age")), selected = NULL,
+                                  choices = list("Pre-1980" = 1, "1980-2004" = 2, "post-2004" = 3)),
+                     numericInput("occupancy", label = h5(strong("Number of People Occupied")), value = 1),
+                     checkboxGroupInput("options", label = h5(strong("Upgrade Options")), 
+                                        choices = list("Install Air Sealing" = 1,
+                                                       "Install Duct Insulation" = 2, "Install Wall Insulation" = 3,
+                                                       "Floor/Foundation Insulation" = 4, "Install Attic Insulation" = 5)))
+                     ),
+                 mainPanel(h3("Annual Utility Cost Savings"),
+                           fluidRow(column(12, align = 'center', plotOutput("plot3")))))),
+             
+    
+    tabPanel(strong("About"))
+
 ))
