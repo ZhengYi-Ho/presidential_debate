@@ -1,10 +1,10 @@
 ############################# Get Data ##############################
 
 library(twitteR)
-key <- 'DWrw5zVwBaqpg5TWxOdn92PXN'
-secret <- '17M15cgkKO19O4lFvHsrsY3RL3eGtKpXUlmmRrMrGdMo1JQ28I'
-token <- '776271306534768640-ljJ26twWCqvw7isZXAIZLadn3TbKCyj'
-token.secret <-	'bRwCc83GSZZ951mhFyn2SLCK8TnYvKqGHCR7cNCUXsNbQ'
+key <- 'xxxxxxxxxxxxxxxxxxxxxxxx'
+secret <- 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+token <- 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+token.secret <-	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
 setup_twitter_oauth(key, secret, token, token.secret)
 
