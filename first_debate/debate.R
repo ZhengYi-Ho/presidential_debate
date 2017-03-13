@@ -1,3 +1,14 @@
+############################ Packages ##############################
+library(TwitteR)
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+library(plyr)
+library(dplyr)
+library(stringr)
+library(quanteda)
+library(wordcloud)
+
 ############################# Get Data ##############################
 
 # Twitter scraping
@@ -120,14 +131,14 @@ sentiment.summary <- scores %>% group_by(name, factor(sentiment)) %>%
 
 # barplot
 ggplot(scores[scores$name == 'Clinton', ], aes(x = factor(sentiment))) + 
-    geom_bar(aes(fill = factor(sentiment))) + 
+  geom_bar(aes(y = (..count..)/sum(..count..), fill = factor(sentiment))) + 
     labs(x = 'Sentiment', y = 'Count', title = 'Clinton') + 
     scale_fill_discrete(name = "Sentiment",
                         breaks = c(-1, 0, 1),
                         labels=c("Negative", "Neutral", "Positive"))
 
 ggplot(scores[scores$name == 'Trump', ], aes(x = factor(sentiment))) + 
-    geom_bar(aes(fill = factor(sentiment))) +
+  geom_bar(aes(y = (..count..)/sum(..count..), fill = factor(sentiment))) +
     labs(x = 'Sentiment', y = 'Count', title = 'Trump') + 
     scale_fill_discrete(name = "Sentiment",
                         breaks = c(-1, 0, 1),

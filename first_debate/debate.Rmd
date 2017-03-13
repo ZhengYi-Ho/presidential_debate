@@ -1,5 +1,5 @@
 ---
-title: "Twitter Mining: Presidential Candidates 2016"
+title: "Sentiment Analysis: First Presidential Debate 2016"
 author: "Yanfei Wu"
 date: "September 29, 2016"
 output: 
@@ -30,11 +30,11 @@ theme_set(theme_bw())
 
 ## Introduction  
 
-The US presidential election of 2016 is in less than 2 months. After series of presidential primary elections and caucuses, businessman Donald Trump became the Republican Party's presidential nominee and former Secretary of State Hillary Clinton became the Democratic Party's presidential nominee. Before November, there are three presidential debates between Clinton and Trump. The first debate just took place several days ago on September 26th. 
+The US presidential election of 2016 is in less than 2 months. After series of presidential primary elections and caucuses, businessman Donald Trump became the Republican Party's presidential nominee and former Secretary of State Hillary Clinton became the Democratic Party's presidential nominee. Before November, there are three presidential debates between Clinton and Trump. The first debate just took place several days ago on September 26th.    
 
-In this post, I perform a sentiment analysis of the two candidates using tweets tweeted after the first debate. The most frequent words appearing in tweets about the two candiadtes are also shown in this post. All codes for this post can be found in [Github](https://github.com/yanfei-wu/ForFun/tree/master/Twitter_Presidential_Candidates).    
+In this post, I show some results of the sentiment analysis I did using tweets collected after the first debate. All codes for this post can be found in [my Github Repository](https://github.com/yanfei-wu/).   
 
-## Twitter Scraping   
+## Getting Data From Twitter   
 
 ```{r read.data}
 # the scraping code is in the seperate R file
@@ -46,13 +46,13 @@ trump.txt <- readRDS('trump_tweet_cleaned.RData')
 tweet <- c(clinton.txt, trump.txt)
 ```
 
-20,000 tweets are collected using the two candidates' names as queries (10,000 tweets for each candidate) from Twitter. An additional filtering step is carried out to remove tweets containing both names since it is difficult to assign the sentiment scores calculated from these tweets to either candidate. As a result, there are `r length(clinton.txt)` tweets left with only Clinton's name and `r length(trump.txt)` tweets left with only Trump's name. 
+20,000 tweets were quried using the two candidates' names (10,000 tweets for each candidate) from Twitter. An additional filtering step was carried out to remove tweets containing both names just to simplify the assignment of the sentiment scores to each candidate. (`r length(clinton.txt)` tweets were left only mentioning Clinton's name and `r length(trump.txt)` tweets only mentioning Trump's name.)    
 
 ## Sentiment Analysis  
 
-The sentiment scores are calculated using a lexicon-based method as proposed by Hu and Liu ([Link](https://www.cs.uic.edu/~liub/publications/kdd04-revSummary.pdf)). A [list](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html#lexicon) of English positive and negative opinion words or sentiment words compiled by them are used. For simplicity, the numbers of positive words and negative words, as given by the list, in each tweet are compared and the difference is used to determine the option orientation or the sentiment score of each tweet.  
+The sentiment scores were calculated using a [lexicon-based method](https://www.cs.uic.edu/~liub/publications/kdd04-revSummary.pdf) as proposed by Hu and Liu. A list of English positive and negative opinion words or sentiment words compiled by them were used (you can find it [here](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html#lexicon)). The different between the number of positive words and the number of negative words in each tweet was used to determine the option orientation or the sentiment score of each tweet.   
 
-Note that before calculating the sentiment scores, the tweets are cleaned by removing punctuations, twitter characters (@ and #), and URLs.  
+*Note*: Before calculating the sentiment scores, the tweets were cleaned by removing punctuations, special characters (@ and #), and URLs.  
 
 ```{r sentiment.score, include = FALSE}
 
@@ -111,7 +111,7 @@ scores$sentiment[scores$score <= -2] <- -1
 scores$sentiment[scores$score >= 2] <- 1 
 ```  
 
-Now, let's look at the sentiment scores of both candidates.  
+Now, let's look at the distribution of sentiment scores for each candidate.    
 
 ```{r histogram, fig.width = 4.5, fig.height = 6, fig.align = 'center'}
 ggplot(scores, aes(x = score)) + 
@@ -129,25 +129,27 @@ ggplot(scores, aes(x = name, y = score)) +
     theme(legend.title = element_blank())
 ```
 
-Clearly, **Clinton has more negative sentiment scores than Trump**, based on tweets used here. The scores are also used to divide the sentiment into 3 categoris below:  
+Both candidates have similar variance in terms of their sentiment score distributions with a similar median roughly around 0. And both have outliers or extreme scores (positive and negative). Overall, it is interesting that based on these tweets **people seem to be less happy with Clinton than with Trump**.   
+
+The raw sentiment scores were then used to divide the sentiment into 3 categoris below:  
 
 * Positive(1): sentiment score >= 2  
 * Neutral(0): -2 < sentiment score < 2  
 * Negative(-1): sentiment score <= -2  
 
-The distributions of positive, neutral, and negative sentiment for both candidates are shown below: 
+The distributions of positive, neutral, and negative sentiments for each candidate are shown below:
 
 ```{r barplot, fig.width = 5, fig.height = 8, fig.align = 'center'}
 plot1 <- ggplot(scores[scores$name == 'Clinton', ], aes(x = factor(sentiment))) + 
-    geom_bar(aes(fill = factor(sentiment))) + 
-    labs(x = 'Sentiment', y = 'Count', title = 'Clinton') + 
+    geom_bar(aes(y = (..count..)/sum(..count..), fill = factor(sentiment))) + 
+    labs(x = 'Sentiment', y = 'Frequency', title = 'Clinton') + 
     scale_fill_discrete(name = "Sentiment",
                         breaks = c(-1, 0, 1),
                         labels=c("Negative", "Neutral", "Positive"))
 
 plot2 <- ggplot(scores[scores$name == 'Trump', ], aes(x = factor(sentiment))) + 
-    geom_bar(aes(fill = factor(sentiment))) +
-    labs(x = 'Sentiment', y = 'Count', title = 'Trump') + 
+    geom_bar(aes(y = (..count..)/sum(..count..), fill = factor(sentiment))) +
+    labs(x = 'Sentiment', y = 'Frequency', title = 'Trump') + 
     scale_fill_discrete(name = "Sentiment",
                         breaks = c(-1, 0, 1),
                         labels=c("Negative", "Neutral", "Positive"))
@@ -155,12 +157,13 @@ plot2 <- ggplot(scores[scores$name == 'Trump', ], aes(x = factor(sentiment))) +
 grid.arrange(plot1, plot2, nrow = 2)
 ```
 
-Again, there seems to be more tweets about Clinton that are negative. But overall, **the majority of the tweets about both candidates are neutral**.   
+Again, the majority of tweets are neutual towards both candidates but there are indeed bias! **More tweets are negative about Clinton than those that are positive**.      
 
 
 ## Word Frequency Analysis  
 
-Another thing we can do is to find out the most frequent words appearing in the tweets about the two candidates. The first step is to construct corpus by compling the tweets. Then, the texts in the corpus are broken into tokens, i.e., single word. After tokenization, document-term matrix is created to describe the frequency of each word that occurs in the corpus. Note that some words are removed from this analysis such as the candidates' names, English stopwords, and some words like 'will', 'can', etc.  
+Another interesting thing we can do with tweets is to a word frequency analysis. The first step is to construct corpus by compling the tweets. Then, the texts in the corpus are broken into tokens, i.e., single word. After tokenization, document-term matrix is created to describe the frequency of each word that occurs in the corpus. Note that some words are removed from this analysis such as the candidates' names and English stopwords.  
+
 
 ```{r word.frequency.corpus, include = FALSE}
 # clean the text
@@ -232,10 +235,10 @@ plot(trump.dfm, max.words = 50, scale = c(3, .2))
 title('Word Cloud from Tweets about Trump')
 ```
 
-Words like 'Bill', 'Emails' appear in tweets about Clinton quite frequently, as expected. It also looks like a lot of tweets about Clinton also mention Gary Johnson. In tweets about Trump, some frequent words are 'race', 'Obama'.   
+Not surprisingly, words like 'Bill', 'Emails', 'FBI' appear in tweets about Clinton quite frequently. It also looks like a lot of tweets about Clinton also mention Gary Johnson. In tweets about Trump, some frequent words are 'race', 'Obama', and also words like 'unfit'!   
 
 
 ## Summary  
 
-This post analyzes tweets tweeted after the first presidential debate about the two presidential candidates, Donald Trump and Hillary Clinton. Sentiment scores, defined as the difference between the number of positive words and that of the negative words based on the analyzed tweets shows a more positive sentiment towards Trump. The majority of the tweets, however, are neutral. The word frequency analysis shows frequent words like 'Bill', 'Emails' appearing in tweets about Clinton, and words like 'race', 'Obama' frequently showing up in tweets about Trump. 
+Tweets about the two presidential candidates, Donald Trump and Hillary Clinton, after the first presidential debate were used for sentiment analysis. Sentiment scores, defined as the difference between the number of positive words and that of the negative words based on the analyzed tweets shows a more positive sentiment towards Trump. The majority of the tweets, however, are neutral. The word frequency analysis shows frequent words like 'Bill', 'Emails' appearing in tweets about Clinton, and words like 'race', 'Obama' frequently showing up in tweets about Trump. 
 
