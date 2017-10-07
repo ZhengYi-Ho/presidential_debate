@@ -8,4 +8,14 @@
 
 The sentiment scores were calculated using a **lexicon-based method**. A list of English positive and negative opinion words or sentiment words compiled by them were used. The different between the number of positive words and the number of negative words in each tweet was used to determine the option orientation or the sentiment score of each tweet.  
 
-The tweets were also used to perform a word frequency analysis and to build word clouds.  
+The tweets were also used to perform a word frequency analysis and to build word clouds.   
+
+## Libraries  
+
+This project was done in `R`. Below are a list of libraries used:  
+
+- `dplyr`  
+- `ggplot2`    
+- `twitteR`    
+- `quanteda`  
+- `wordcloud`  
